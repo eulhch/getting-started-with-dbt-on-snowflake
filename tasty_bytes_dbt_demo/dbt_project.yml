@@ -21,5 +21,6 @@ models:
   tasty_bytes:
     staging:
       +materialized: view
+      +tags: ["staged_tag"]
     marts:
       +materialized: table
