@@ -19,6 +19,7 @@ clean-targets: [target, dbt_modules]
 ## Models
 models:
   tasty_bytes:
+    # +materialized: table
     staging:
       +materialized: view
       +tags: ["staged_tag"]
