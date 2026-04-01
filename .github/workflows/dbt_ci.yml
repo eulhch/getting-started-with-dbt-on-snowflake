@@ -17,19 +17,17 @@ jobs:
 
       - name: Run dbt CI
         env:
-          # Mapping your GitHub Secrets to Environment Variables
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-        
         run: |
-          # 1. Create the key file
+          # 1. Recreate the key file from the secret text
           echo "$SNOWFLAKE_PRIVATE_KEY" > snowflake_key.p8
           chmod 600 snowflake_key.p8
 
-          # 2. Run the deploy with the SCHEMA added
+          # 2. Native Snowflake dbt Deploy
           snow dbt deploy tasty_bytes \
             --source tasty_bytes_dbt_demo \
             --profiles-dir tasty_bytes_dbt_demo \
