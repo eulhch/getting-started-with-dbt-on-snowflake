@@ -11,7 +11,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-<<<<<<< test_connection_branch
       - name: Install Python
         uses: actions/setup-python@v5
         with:
@@ -21,10 +20,6 @@ jobs:
         run: |
           pip install snowflake-cli-labs
           pip install dbt-snowflake
-=======
-      - name: Install Snowflake CLI
-        uses: Snowflake-Labs/snowflake-cli-action@v1.1.0
->>>>>>> main
 
       - name: Deploy to Prod
         env:
@@ -35,6 +30,5 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
         run: |
-          snow dbt deps
           # This deploys to your 'prod' target defined in profiles.yml
           snow dbt deploy --target prod
