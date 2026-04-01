@@ -32,6 +32,7 @@ jobs:
             --account "${{ secrets.SNOWFLAKE_ACCOUNT }}" \
             --user "${{ secrets.SNOWFLAKE_USER }}" \
             --private-key-file <(echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}") \
+            --authenticator "SNOWFLAKE_JWT" \
             --role "${{ secrets.SNOWFLAKE_ROLE }}" \
             --warehouse "${{ secrets.SNOWFLAKE_WAREHOUSE }}" \
             --database "tasty_bytes_dbt_db" \
