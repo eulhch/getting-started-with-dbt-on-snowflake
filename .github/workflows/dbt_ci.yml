@@ -17,23 +17,28 @@ jobs:
 
       - name: Run dbt CI
         env:
+          # Mapping your GitHub Secrets to Environment Variables
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
-          SNOWFLAKE_DATABASE: tasty_bytes_dbt_db
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
         run: |
+          # 1. This creates the 'snowflake_key.p8' file using the secret text
+          echo "$SNOWFLAKE_PRIVATE_KEY" > snowflake_key.p8
+          chmod 600 snowflake_key.p8
+
+          # 2. Run the deploy using that temporary file
           snow dbt deploy tasty_bytes \
             --source tasty_bytes_dbt_demo \
             --profiles-dir tasty_bytes_dbt_demo \
             --default-target dev \
             --temporary-connection \
-            --account "${{ secrets.SNOWFLAKE_ACCOUNT }}" \
-            --user "${{ secrets.SNOWFLAKE_USER }}" \
-            --private-key-file <(echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}") \
+            --account "$SNOWFLAKE_ACCOUNT" \
+            --user "$SNOWFLAKE_USER" \
+            --private-key-file "snowflake_key.p8" \
             --authenticator "SNOWFLAKE_JWT" \
-            --role "${{ secrets.SNOWFLAKE_ROLE }}" \
-            --warehouse "${{ secrets.SNOWFLAKE_WAREHOUSE }}" \
+            --role "$SNOWFLAKE_ROLE" \
+            --warehouse "$SNOWFLAKE_WAREHOUSE" \
             --database "tasty_bytes_dbt_db" \
             --force
