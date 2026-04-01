@@ -33,7 +33,5 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
         run: |
-          # We use 'snow dbt' which is the Snowflake CLI wrapper
-          snow dbt deps
           # Note: We removed --state for this first run to ensure it passes
           snow dbt deploy --target dev
