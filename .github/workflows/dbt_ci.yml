@@ -10,19 +10,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install Snowflake CLI and dbt
+      - name: Install Python and Snowflake CLI
         run: |
-          pip install snowflake-cli-labs
-          # We install dbt-snowflake specifically to ensure the CLI has the driver
-          pip install dbt-snowflake
+          pip install snowflake-cli-labs dbt-snowflake
 
       - name: Run dbt CI
         env:
@@ -33,5 +24,9 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
         run: |
-          # Note: We removed --state for this first run to ensure it passes
-          snow dbt deploy --target dev
+          # We use '.' because your project is in the root of the repo
+          snow dbt deploy tasty_bytes \
+            --source . \
+            --profiles-dir . \
+            --default-target dev \
+            --force
