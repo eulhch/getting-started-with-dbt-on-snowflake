@@ -23,12 +23,13 @@ jobs:
           SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+        
         run: |
-          # 1. This creates the 'snowflake_key.p8' file using the secret text
+          # 1. Create the key file
           echo "$SNOWFLAKE_PRIVATE_KEY" > snowflake_key.p8
           chmod 600 snowflake_key.p8
 
-          # 2. Run the deploy using that temporary file
+          # 2. Run the deploy with the SCHEMA added
           snow dbt deploy tasty_bytes \
             --source tasty_bytes_dbt_demo \
             --profiles-dir tasty_bytes_dbt_demo \
@@ -41,4 +42,5 @@ jobs:
             --role "$SNOWFLAKE_ROLE" \
             --warehouse "$SNOWFLAKE_WAREHOUSE" \
             --database "tasty_bytes_dbt_db" \
+            --schema "PUBLIC" \
             --force
