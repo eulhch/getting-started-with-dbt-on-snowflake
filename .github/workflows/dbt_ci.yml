@@ -24,9 +24,15 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
         run: |
-          # We use '.' because your project is in the root of the repo
           snow dbt deploy tasty_bytes \
-            --source . \
-            --profiles-dir . \
+            --source tasty_bytes_dbt_demo \
+            --profiles-dir tasty_bytes_dbt_demo \
             --default-target dev \
+            --temporary-connection \
+            --account "${{ secrets.SNOWFLAKE_ACCOUNT }}" \
+            --user "${{ secrets.SNOWFLAKE_USER }}" \
+            --private-key-file <(echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}") \
+            --role "${{ secrets.SNOWFLAKE_ROLE }}" \
+            --warehouse "${{ secrets.SNOWFLAKE_WAREHOUSE }}" \
+            --database "tasty_bytes_dbt_db" \
             --force
