@@ -22,12 +22,20 @@ jobs:
           SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+        
         run: |
-          # 1. Recreate the key file from the secret text
+          # 1. Create the key file
           echo "$SNOWFLAKE_PRIVATE_KEY" > snowflake_key.p8
           chmod 600 snowflake_key.p8
 
-          # 2. Native Snowflake dbt Deploy
+          # 2. INSTALL PACKAGES LOCALLY FIRST
+          # This creates the 'dbt_packages' folder that Snowflake is looking for
+          cd tasty_bytes_dbt_demo
+          dbt deps
+          cd ..
+
+          # 3. Native Snowflake dbt Deploy
+          # Now 'dbt_packages' will be included in the upload
           snow dbt deploy tasty_bytes \
             --source tasty_bytes_dbt_demo \
             --profiles-dir tasty_bytes_dbt_demo \
