@@ -17,6 +17,7 @@ jobs:
       SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
       SNOWFLAKE_DATABASE: "tasty_bytes_dbt_db"
       SNOWFLAKE_SCHEMA: "PUBLIC"
+      SNOWFLAKE_DEFAULT_CONNECTION_NAME: "default"
 
     steps:
       - name: Checkout Code
