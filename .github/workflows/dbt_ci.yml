@@ -25,7 +25,7 @@ jobs:
           account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
           user = "${{ secrets.SNOWFLAKE_USER }}"
           authenticator = "SNOWFLAKE_JWT"
-          private_key_raw = "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}"
+          private_key_raw = """${{ secrets.SNOWFLAKE_PRIVATE_KEY }}"""
           role = "${{ secrets.SNOWFLAKE_ROLE }}"
           warehouse = "${{ secrets.SNOWFLAKE_WAREHOUSE }}"
           database = "tasty_bytes_dbt_db"
