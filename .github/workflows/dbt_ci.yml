@@ -18,7 +18,6 @@ jobs:
           cli-version: "latest"
 
       - name: Create Snowflake Config
-        # This step bridges the gap between GitHub Secrets and the snow dbt command
         run: |
           mkdir -p ~/.snowflake
           cat <<EOF > ~/.snowflake/config.toml
@@ -32,6 +31,7 @@ jobs:
           database = "tasty_bytes_dbt_db"
           schema = "PUBLIC"
           EOF
+          chmod 0600 ~/.snowflake/config.toml
 
       - name: Install dbt
         run: pip install dbt-snowflake
@@ -42,7 +42,6 @@ jobs:
           dbt deps
 
       - name: Deploy Project
-        # The CLI now reads the [connections.default] block from ~/.snowflake/config.toml
         run: |
           snow dbt deploy tasty_bytes \
             --source tasty_bytes_dbt_demo \
@@ -50,7 +49,5 @@ jobs:
             --force
 
       - name: Execute Slim CI (Build Modified)
-        # Validates your SQL and data tests. 
-        # Note: If no manifest is found, use '--select path:models/' for this PR.
         run: |
           snow dbt execute tasty_bytes build --select state:modified+
