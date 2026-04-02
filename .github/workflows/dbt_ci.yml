@@ -24,18 +24,18 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
         
         run: |
-          # 1. Create the key file
+          # 1. Setup Key
           echo "$SNOWFLAKE_PRIVATE_KEY" > snowflake_key.p8
           chmod 600 snowflake_key.p8
 
-          # 2. INSTALL PACKAGES LOCALLY FIRST
-          # This creates the 'dbt_packages' folder that Snowflake is looking for
+          # 2. Local Prep
           cd tasty_bytes_dbt_demo
           dbt deps
+          # Note: For 'state:modified' to work, you usually need a manifest.json 
+          # from your production branch located in a 'state' folder.
           cd ..
 
-          # 3. Native Snowflake dbt Deploy
-          # Now 'dbt_packages' will be included in the upload
+          # 3. Deploy
           snow dbt deploy tasty_bytes \
             --source tasty_bytes_dbt_demo \
             --profiles-dir tasty_bytes_dbt_demo \
@@ -50,3 +50,18 @@ jobs:
             --database "tasty_bytes_dbt_db" \
             --schema "PUBLIC" \
             --force
+
+          # 4. Native Slim CI Execution (Corrected Syntax)
+          # We pass 'build' and the selector flags as direct arguments
+          snow dbt execute tasty_bytes build \
+            --select state:modified+ \
+            --state ./state \
+            --temporary-connection \
+            --account "$SNOWFLAKE_ACCOUNT" \
+            --user "$SNOWFLAKE_USER" \
+            --private-key-file "snowflake_key.p8" \
+            --authenticator "SNOWFLAKE_JWT" \
+            --role "$SNOWFLAKE_ROLE" \
+            --warehouse "$SNOWFLAKE_WAREHOUSE" \
+            --database "tasty_bytes_dbt_db" \
+            --schema "PUBLIC"
