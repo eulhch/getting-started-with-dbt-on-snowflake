@@ -31,8 +31,6 @@ jobs:
           # 2. Local Prep
           cd tasty_bytes_dbt_demo
           dbt deps
-          # Note: For 'state:modified' to work, you usually need a manifest.json 
-          # from your production branch located in a 'state' folder.
           cd ..
 
           # 3. Deploy
@@ -51,11 +49,10 @@ jobs:
             --schema "PUBLIC" \
             --force
 
-          # 4. Native Slim CI Execution (Corrected Syntax)
-          # We pass 'build' and the selector flags as direct arguments
+          # 4. Slim CI Execution (Added --connection)
           snow dbt execute tasty_bytes build \
             --select state:modified+ \
-            --state ./state \
+            --connection "temp_ci" \
             --temporary-connection \
             --account "$SNOWFLAKE_ACCOUNT" \
             --user "$SNOWFLAKE_USER" \
