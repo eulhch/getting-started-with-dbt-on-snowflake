@@ -50,4 +50,4 @@ jobs:
 
       - name: Execute Slim CI (Build Modified)
         run: |
-          snow dbt execute tasty_bytes build --select state:modified+
+          snow dbt execute tasty_bytes build
