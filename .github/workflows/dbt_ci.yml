@@ -7,6 +7,15 @@ on:
 jobs:
   ci_run:
     runs-on: ubuntu-latest
+    # We define these as env vars to keep the 'run' commands clean
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      SNOWFLAKE_DATABASE: "tasty_bytes_dbt_db"
+      SNOWFLAKE_SCHEMA: "PUBLIC"
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -15,29 +24,21 @@ jobs:
         run: |
           pip install snowflake-cli-labs dbt-snowflake
 
-      - name: Run dbt CI
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-        
+      - name: Create Private Key File
         run: |
-          # 1. Setup Key
-          echo "$SNOWFLAKE_PRIVATE_KEY" > snowflake_key.p8
+          echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > snowflake_key.p8
           chmod 600 snowflake_key.p8
 
-          # 2. Local Prep
+      - name: Install dbt Dependencies (Local)
+        run: |
           cd tasty_bytes_dbt_demo
           dbt deps
-          cd ..
 
-          # 3. Deploy
+      - name: Deploy Project to Snowflake Stage
+        run: |
           snow dbt deploy tasty_bytes \
             --source tasty_bytes_dbt_demo \
             --profiles-dir tasty_bytes_dbt_demo \
-            --default-target dev \
             --temporary-connection \
             --account "$SNOWFLAKE_ACCOUNT" \
             --user "$SNOWFLAKE_USER" \
@@ -45,14 +46,16 @@ jobs:
             --authenticator "SNOWFLAKE_JWT" \
             --role "$SNOWFLAKE_ROLE" \
             --warehouse "$SNOWFLAKE_WAREHOUSE" \
-            --database "tasty_bytes_dbt_db" \
-            --schema "PUBLIC" \
+            --database "$SNOWFLAKE_DATABASE" \
+            --schema "$SNOWFLAKE_SCHEMA" \
             --force
 
-          # 4. Slim CI Execution (Added --connection)
+      - name: Execute Slim CI (Build Modified Models)
+        run: |
+          # We use the unquoted syntax for 'build' and '--select'
+          # This tells Snowflake to run only the changed models
           snow dbt execute tasty_bytes build \
             --select state:modified+ \
-            --connection "temp_ci" \
             --temporary-connection \
             --account "$SNOWFLAKE_ACCOUNT" \
             --user "$SNOWFLAKE_USER" \
@@ -60,5 +63,5 @@ jobs:
             --authenticator "SNOWFLAKE_JWT" \
             --role "$SNOWFLAKE_ROLE" \
             --warehouse "$SNOWFLAKE_WAREHOUSE" \
-            --database "tasty_bytes_dbt_db" \
-            --schema "PUBLIC"
+            --database "$SNOWFLAKE_DATABASE" \
+            --schema "$SNOWFLAKE_SCHEMA"
